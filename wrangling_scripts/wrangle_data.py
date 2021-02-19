@@ -29,6 +29,7 @@ def return_figures():
     # first chart plots arable land from 1990 to 2015 in top 10 economies 
     # as a line chart
     graph_one = []
+
     df = read_data('data/df_all_rules.pkl')
 
     df_all_rules_group = df.groupby(['SITE_NUMBER',
