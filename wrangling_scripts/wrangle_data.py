@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import plotly.graph_objs as go
 
 # Use this file to read in your data and prepare the plotly visualizations. The path to the data files are in
@@ -29,6 +30,7 @@ def return_figures():
     # first chart plots arable land from 1990 to 2015 in top 10 economies 
     # as a line chart
     graph_one = []
+    graph_two = []
 
     df = read_data('data/df_all_rules.pkl')
 
@@ -39,35 +41,111 @@ def return_figures():
     df_all_rules_group_pivot = df_all_rules_group.pivot(index='year',
                                                   columns='month',
                                                   values='TMR_SUB_18')
-    graph_one.append(
-        go.Table(
+    
+    headerColor = 'grey'
+    rowEvenColor = 'lightgrey'
+    rowOddColor = 'white'
+    
+    fig_table = go.Table(
             columnwidth=180,
             header=dict(values=list(['year'])
                                + list(df_all_rules_group_pivot.columns),
-                        fill_color='paleturquoise',
-                        align='left',
-            font=dict(color='white', size=12),
+                        fill_color=headerColor,
+                        line_color='darkslategray',
+                        align=['left', 'center'],
+                        font=dict(color='white', size=12),
             height=40),
-            cells=dict(values=[df_all_rules_group_pivot.index,
-                               df_all_rules_group_pivot.iloc[:, :1].values,
-                               df_all_rules_group_pivot.iloc[:, 1:2].values,
-                               df_all_rules_group_pivot.iloc[:, 2:3].values,
-                               df_all_rules_group_pivot.iloc[:, 3:4].values,
-                               df_all_rules_group_pivot.iloc[:, 4:5].values,
-                               df_all_rules_group_pivot.iloc[:, 5:6].values,
-                               df_all_rules_group_pivot.iloc[:, 6:7].values,
-                               df_all_rules_group_pivot.iloc[:, 7:8].values,
-                               df_all_rules_group_pivot.iloc[:, 8:9].values,
-                               df_all_rules_group_pivot.iloc[:, 9:10].values,
-                               df_all_rules_group_pivot.iloc[:, 10:11].values,
-                               df_all_rules_group_pivot.iloc[:, 11:12].values, ],
-                       fill_color='lavender',
-                       align='left')))
+            cells=dict(values=[
+                df_all_rules_group_pivot.index,
+                np.around(df_all_rules_group_pivot.iloc[:, :1].values,2),
+                np.around(df_all_rules_group_pivot.iloc[:, 1:2].values,2),
+                np.around(df_all_rules_group_pivot.iloc[:, 2:3].values,2),
+                np.around(df_all_rules_group_pivot.iloc[:, 3:4].values,2),
+                np.around(df_all_rules_group_pivot.iloc[:, 4:5].values,2),
+                np.around(df_all_rules_group_pivot.iloc[:, 5:6].values,2),
+                np.around(df_all_rules_group_pivot.iloc[:, 6:7].values,2),
+                np.around(df_all_rules_group_pivot.iloc[:, 7:8].values,2),
+                np.around(df_all_rules_group_pivot.iloc[:, 8:9].values,2),
+                np.around(df_all_rules_group_pivot.iloc[:, 9:10].values,2),
+                np.around(df_all_rules_group_pivot.iloc[:, 10:11].values,2),
+                np.around(df_all_rules_group_pivot.iloc[:, 11:12].values,2) ],
+                line_color='darkslategray',
+                # 2-D list of colors for alternating rows
+                fill_color = [[rowOddColor,
+                rowEvenColor,
+                rowOddColor, 
+                rowEvenColor,
+                rowOddColor]*5],
+                align = ['left'],
+                font = dict(color = 'darkslategray', size = 11)
+            ))
+
+    graph_one.append(
+        fig_table
+    )
     
     layout_one = dict(title='128 TMR_SUB_18',
                       xaxis=dict(title='Months'),
                       yaxis=dict(title='Years')
                       )
+
+    
+    ########## graph two
+
+    # best result in Jupyter #
+    import plotly.figure_factory as ff
+
+    z=np.round(df_all_rules_group_pivot.values[::-1],2)
+    x=list(df_all_rules_group_pivot.columns)
+    y=list(df_all_rules_group_pivot.index[::-1])
+
+    # fig = ff.create_annotated_heatmap(z, x=x, y=y, annotation_text=z, colorscale='Viridis')
+
+    """layout_two = {}
+    layout_two = dict(title='128 TMR_SUB_18 Heatmap',
+                      xaxis=dict(title='Months'),
+                      yaxis=dict(title='Years')
+                      )
+
+    fig_heatmap = ff.create_annotated_heatmap(z, 
+    x=x, 
+    y=y, 
+    font_colors=['antiquewhite'], 
+    hoverinfo='y+x+z')
+        
+    graph_two.append(fig_heatmap)"""
+    
+    # Other attempt with go.Heatmap instead of ff.create_annotated_heatmap # 
+
+    """fig_heatmap_2 = go.Figure(data=go.Heatmap(
+                   z=df_all_rules_group_pivot.values[::-1],
+                   x=df_all_rules_group_pivot.columns,
+                   y=df_all_rules_group_pivot.index[::-1],
+                   hoverongaps = False))
+
+    layout = go.Layout(title="Temperature test", showlegend=True)
+    graph_two.append(fig_heatmap_2)"""
+    
+
+    # Remaining attempts *
+
+    trace_heatmap = go.Heatmap(
+                   z=df_all_rules_group_pivot.values[::-1],
+                   x=df_all_rules_group_pivot.columns,
+                   y=df_all_rules_group_pivot.index[::-1],
+                   hoverongaps = False)
+
+    data = [trace_heatmap]
+
+    trace_layout = go.Layout(title="Test", showlegend=True)
+
+    figure_heatmap = go.Figure(data=data, layout=trace_layout)              
+
+    graph_two.append(trace_heatmap)
+
+    layout_two = dict(title='128 TMR_SUB_18 Heatmap'
+                      )
+
     """
     df_region = df.groupby('REGION').mean().reset_index()
     df_region = df_region.drop('AADT_2006', axis=1)
@@ -156,10 +234,10 @@ def return_figures():
                 )"""
     
     # append all charts to the figures list
-    figures = [dict(data=graph_one, layout=layout_one)]
-
-
-    """ figures.append(dict(data=graph_two, layout=layout_two))
+    figures = []
+    figures.append(dict(data=graph_one, layout=layout_one))
+    figures.append(dict(data=graph_two, layout=layout_two))
+    """
     figures.append(dict(data=graph_three, layout=layout_three))
     figures.append(dict(data=graph_four, layout=layout_four))"""
 

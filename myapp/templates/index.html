@@ -73,13 +73,14 @@
                 <div class="col-11">
                     <div id="{{ids[0]}}"></div>
                 </div>
-<!--                <div class="col-6">-->
-<!--                    <div id="{{ids[1]}}"></div>-->
-<!--                </div>-->
+               
             </div>
 
             <!--bottom two charts-->        
-<!--            <div class="row mb-6">-->
+           <div class="row mb-6">
+               <div class="col-11">
+                   <div id="{{ids[1]}}"></div>
+               </div>
 <!--                <div class="col-6"> -->
 <!--                    <div id="chart3">-->
 <!--                        <div id="{{ids[2]}}"></div>-->
@@ -90,7 +91,7 @@
 <!--                        <div id="{{ids[3]}}"></div>-->
 <!--                    </div>-->
 <!--                <div>-->
-<!--            </div>-->
+           </div>
         
         </div>
     </div>
@@ -112,7 +113,7 @@
         for(var i in figures) {
             Plotly.plot(ids[i],
                 figures[i].data,
-                figures[i].layout || {});
+                figures[i].layout);
         }
     </script>
     
