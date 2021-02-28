@@ -31,6 +31,7 @@ def return_figures():
     # as a line chart
     graph_one = []
     graph_two = []
+    graph_three = []
 
     df = read_data('data/df_all_rules.pkl')
 
@@ -42,6 +43,11 @@ def return_figures():
                                                   columns='month',
                                                   values='TMR_SUB_18')
     
+
+    # Graph One - Table
+
+    ########################################################################################
+
     headerColor = 'grey'
     rowEvenColor = 'lightgrey'
     rowOddColor = 'white'
@@ -90,8 +96,9 @@ def return_figures():
                       )
 
     
-    ########## graph two
+    ########## graph heatmap
 
+    ########################################################################################
     # best result in Jupyter #
     import plotly.figure_factory as ff
 
@@ -127,7 +134,7 @@ def return_figures():
     graph_two.append(fig_heatmap_2)"""
     
 
-    # Remaining attempts *
+    # working attempt *
 
     trace_heatmap = go.Heatmap(
                    z=df_all_rules_group_pivot.values[::-1],
@@ -135,68 +142,74 @@ def return_figures():
                    y=df_all_rules_group_pivot.index[::-1],
                    hoverongaps = False)
 
-    data = [trace_heatmap]
-
-    trace_layout = go.Layout(title="Test", showlegend=True)
-
-    figure_heatmap = go.Figure(data=data, layout=trace_layout)              
+    # data = [trace_heatmap]
+    # trace_layout = go.Layout(title="Test", showlegend=True)
+    # figure_heatmap = go.Figure(data=data, layout=trace_layout)              
 
     graph_two.append(trace_heatmap)
 
     layout_two = dict(title='128 TMR_SUB_18 Heatmap'
                       )
+    
+    # line graphs
+
+    ########################################################################################
+
+    month_list = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+
+    new_df_all = pd.DataFrame()
+
+    for year in df_all_rules_group.year.unique():
+        months_list_loop = list(df_all_rules_group.loc[df_all_rules_group.year==year].month.unique())
+        # print(f'count of months: {len(months_list_loop)} \nlist of months: {months_list_loop} \n')
+        new_df_group = df_all_rules_group.loc[df_all_rules_group.year==year].groupby(['year',
+                                                                            'month'])['TMR_SUB_18'].mean().reset_index()
+        # print(f'new_df_group: \n{new_df_group.head()}')
+        # print()
+        for month in month_list:
+            if month not in list(new_df_group.month.unique()):
+                # print(f'missing month: {month}') 
+                null_month = {'year':year, 'month':month, 'TMR_SUB_18':np.nan}
+                # print(f'null_month: {null_month}')
+                # print(f'null month list size: {len(null_month)}')
+                new_df_group = new_df_group.append(null_month, ignore_index=True)
+            
+                # print(f'new_df_group shape: \n{new_df_group.shape}')
+                # print()
+    
+        # print(f'new_df unique months: {new_df_group.month.unique()}')
+    
+        new_df_all = new_df_all.append(new_df_group)
+        new_df_all = new_df_all.astype({"year": int, "month": int, 'TMR_SUB_18': float})
+        new_df_all = new_df_all.sort_values(['year', 'month'])
+
+    # 
+    for year in new_df_all.year.unique():
+    # print(data_test_group.loc[data_test_group.year==year].groupby(['year', 'month'])['TMR_SUB_18'].mean())
+        graph_three.append(go.Scatter(x=month_list, 
+                             y=new_df_all.loc[new_df_all.year==year].groupby(['year',
+                             'month'])['TMR_SUB_18'].mean(),
+                    mode='lines+markers',
+                    name=str(year) + ' Monthly Averages',
+                            connectgaps=False,
+                            line_shape='spline'))
+    
+        # fig.update_xaxes(nticks=12)
+        # fig.update_xaxes(tick0=1, dtick=1)
+    
+    graph_three.append(go.Scatter(x=month_list, 
+                         y=new_df_all.groupby(['month'])['TMR_SUB_18'].mean(), 
+                         line = dict(color='darkturquoise', 
+                                     width=4, 
+                                     dash='dot'),
+                        name='Average',
+                            line_shape='spline'))
+    
+    layout_three = dict(title='128 TMR_SUB_18 Line Graph', hovermode='closest')
+
+    ########################################################################################
 
     """
-    df_region = df.groupby('REGION').mean().reset_index()
-    df_region = df_region.drop('AADT_2006', axis=1)
-    df_regions = df_region.iloc[:, 7:18]
-    
-    df_regions['Region'] = df_region["REGION"]
-    region_cols = df_region.iloc[:, 7:18]
-    df_region_melt = df_regions.melt(id_vars='Region', value_vars=region_cols)
-    
-    df_region_melt = df_region_melt.loc[df_region_melt['Region'] != "CENTRAL,NORTHERN"]
-    df_region_melt
-
-#     second chart plots ararble land for 2015 as a bar chart    
-    graph_two = []
-    
-    x_val = df_region_melt.Region
-    y_2019_val = y_val = df_region_melt.loc[df_region_melt['variable']=='AADT_2019'].value
-    y_2018_val = y_val = df_region_melt.loc[df_region_melt['variable']=='AADT_2018'].value
-    y_2017_val = y_val = df_region_melt.loc[df_region_melt['variable']=='AADT_2017'].value
-    graph_two.append(
-         go.Bar(
-         x = x_val,
-         y = y_2019_val,
-             hovertext = ['2019','2019','2019'],
-            name='2019'
-         )
-    )
-    graph_two.append(
-        go.Bar(
-         x = x_val,
-         y = y_2018_val.tolist(),
-             hovertext = ['2018','2018','2018'],
-            name='2018'
-         )
-    )
-    graph_two.append(
-        go.Bar(
-         x = x_val,
-         y = y_2017_val.tolist(),
-             hovertext = ['2017','2017','2017'],
-            name='2017'
-         )
-    )
-   
-    layout_two = dict(title = 'Average AADT by Region by Year', 
-                      xaxis = dict(title = 'Region'),
-                      yaxis = dict(title = 'Culmative Average AADT'),
-                      hovermode= "closest",
-                    )
-
-
 # third chart plots percent of population that is rural from 1990 to 2015
     
     graph_three = []
@@ -237,8 +250,7 @@ def return_figures():
     figures = []
     figures.append(dict(data=graph_one, layout=layout_one))
     figures.append(dict(data=graph_two, layout=layout_two))
-    """
     figures.append(dict(data=graph_three, layout=layout_three))
-    figures.append(dict(data=graph_four, layout=layout_four))"""
+    """figures.append(dict(data=graph_four, layout=layout_four))"""
 
     return figures
