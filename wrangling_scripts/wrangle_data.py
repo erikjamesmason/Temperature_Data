@@ -173,9 +173,12 @@ def return_figures():
     heatmap_figure.update_yaxes(tick0=1, dtick=1)"""
     graph_two.append(trace_heatmap)
 
-    layout_test = go.Layout(xaxis=dict(tick0=0,
-      dtick = 1), yaxis=dict(tick0=2003,
-      dtick = 1))
+    layout_test = go.Layout(
+        xaxis=dict(tick0=0,
+      dtick = 1), 
+      yaxis=dict(tick0=2003,
+      dtick = 1),
+      title="128 TMR_SUB_18 Heatmap")
 
     annotations = []
 
@@ -234,15 +237,20 @@ def return_figures():
         new_df_all = new_df_all.sort_values(['year', 'month'])
 
     # 
+    colors = plotly.colors.sequential.Blugrn * 2
+    color_counter = 0 
     for year in new_df_all.year.unique():
     # print(data_test_group.loc[data_test_group.year==year].groupby(['year', 'month'])['TMR_SUB_18'].mean())
         graph_three.append(go.Scatter(x=month_list, 
                              y=new_df_all.loc[new_df_all.year==year].groupby(['year',
                              'month'])['TMR_SUB_18'].mean(),
                     mode='lines+markers',
+                             opacity=0.8,
                     name=str(year) + ' Monthly Averages',
                             connectgaps=False,
-                            line_shape='spline'))
+                            line_shape='spline',
+                            line=dict(color=colors[color_counter])))
+        color_counter += 1                    
     
         # fig.update_xaxes(nticks=12)
         # fig.update_xaxes(tick0=1, dtick=1)
